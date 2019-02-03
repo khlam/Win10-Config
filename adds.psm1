@@ -196,46 +196,57 @@ Function ChangeVolumeClassic {
 
 ## Install Chocolatey if not already installed
 Function InstallChoco {
-	$share = choco upgrade chocolatey -y
-	if($?)
-	{
-		Write-Host "Chocolatey already installed."
-	}
-	else
-	{
+	Write-Host "Installing chocolatey..."
+	$error.clear()
+	try { choco }
+	catch { 
 		Write-Host -nonewline "Install chocolatey? (Y/N) "
 		$response = read-host
 		if ( $response -ne "Y" ) { return; }
 		Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 	}
-}
-
-## Install all packages I use on all systems
-Function InstallChocoPrograms {
-	$share = choco upgrade chocolatey -y
-	if($?)
-	{
-		$programs = [string[]](Get-Content $psscriptroot\chocoInstall.txt | Select-Object -Skip 3)
-		Write-Host "Found programs: " $programs
-		Write-Host -NoNewline "Install? (Y/N)"
-		if ( $response -ne "Y" ) { return; }
-	}
-	else
-	{
-		Write-Host "Chocolatey is not installed."
+	if (!$error) {
+		Write-Host "Chocolatey already installed."
 	}
 }
 
+## Install all packages in chocoInstall.txt
+Function InstallChocoPkgs {
+	$file = "$psscriptroot\chocoInstall.txt"
+	Write-Host "Installing all packages in $file that are not already installed..."
+	if (Test-Path $file) {
+		$toInstall = [string[]](Get-Content $file | Select-Object -Skip 3)
+		if (!($toInstall.count -eq 0)) {
+			$installed = [string[]](choco list --local-only | ForEach {"$_".Split(" ")[0]})
+			$notInstalled = $toInstall | Where {$installed -NotContains $_}
+			
+			if (!($notInstalled.count -eq 0)){
+				Write-Host "Found packages in $file that are not installed: $notInstalled"
+				Write-Host -NoNewline "Install? (Y/N)"
+				$response = read-host
+				if ( $response -ne "Y" ) { return; }
+				
+				ForEach ($j in $notInstalled) {
+					choco install $j -y
+				}
+			}else {
+				Write-Host "All packages from $file installed."
+			}
+		}
+	}else {
+		Write-Host "Cannot find chocoInstall.txt."
+	}
+}
+
+# Update choco
 Function UpdateChoco {
-	$share = choco upgrade chocolatey -y
-	if($?)
-	{
+	Write-Host "Updating chocolatey..."
+	$error.clear()
+	try { choco }
+	catch { Write-Host "Chocolatey is not installed." }
+	if (!$error) {
 		choco upgrade chocolatey -y
 		choco upgrade all -y
-	}
-	else
-	{
-		Write-Host "Chocolatey is not installed."
 	}
 }
 
