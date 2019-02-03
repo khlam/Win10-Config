@@ -195,7 +195,7 @@ Function ChangeVolumeClassic {
 
 
 ## Install Chocolatey if not already installed
-Function InstallChocolatey {
+Function InstallChoco {
 	$share = choco upgrade chocolatey -y
 	if($?)
 	{
@@ -211,60 +211,14 @@ Function InstallChocolatey {
 }
 
 ## Install all packages I use on all systems
-Function InstallChocoPkgTools {
+Function InstallChocoPrograms {
 	$share = choco upgrade chocolatey -y
 	if($?)
 	{
-		# Assumption: If script has not been run before, then 7-zip would not have been installed.
-		if (!(Test-Path $env:ProgramFiles\7-zip\))
-		{
-			Write-Host -nonewline "Install: vlc, firefox, keepassxc, git, megasync, sumatrapdf, winscp, putty, visualstudiocode, hwmonitor, and 7-zip. Continue? (Y/N) "
-			$response = read-host
-			if ( $response -ne "Y" ) { return; }
-			choco install vlc -y
-			choco install firefox -y
-			choco install keepassxc -y
-			choco install git.install -y
-			choco install megasync -y
-			choco install sumatrapdf.install -y
-			choco install winscp -y
-			choco install putty.install -y
-			choco install visualstudiocode -y
-			choco install hwmonitor -y
-			choco install 7zip.install -y
-		}
-		else
-		{
-			Write-Host "7-Zip already installed. Assuming all primary packages are already installed."
-		}
-	}
-	else
-	{
-		Write-Host "Chocolatey is not installed."
-	}
-}
-
-## Install all other packages I like
-Function InstallChocoPkgMisc {
-	$share = choco upgrade chocolatey -y
-	if($?)
-	{
-		# Assumption: If script has not been run before, then steam would not have been installed.
-		if (!(Test-Path ${env:ProgramFiles(x86)}\Steam\))
-		{
-			Write-Host -nonewline "Install: discord, cpu-z, deluge, autohotkey, and steam. Continue? (Y/N) "
-			$response = read-host
-			if ( $response -ne "Y" ) { return; }
-			choco install discord -y
-			choco install cpu-z -y
-			choco install deluge -y
-			choco install steam -y
-			choco install autohotkey.install -y
-		}
-		else
-		{
-			Write-Host "Steam installed. Assuming all misc packages are already installed."
-		}
+		$programs = [string[]](Get-Content $psscriptroot\chocoInstall.txt | Select-Object -Skip 3)
+		Write-Host "Found programs: " $programs
+		Write-Host -NoNewline "Install? (Y/N)"
+		if ( $response -ne "Y" ) { return; }
 	}
 	else
 	{
@@ -276,6 +230,7 @@ Function UpdateChoco {
 	$share = choco upgrade chocolatey -y
 	if($?)
 	{
+		choco upgrade chocolatey -y
 		choco upgrade all -y
 	}
 	else
@@ -304,24 +259,4 @@ Function GamingRegSet{
 	else {
 		Write-Host "Steam is not installed. Assuming gaming performance registry tweaks are not needed."
 	}
-}
-
-Function main {
-    Write-Output ""
-    Write-Output ""
-    Write-Output " --- Executing adds.psm1 Functions ---"
-    DisableServices
-    DisableNagle
-    DisableTeleIps
-    DisableEnhancedPointerPrecision
-    DisableTransparency
-    ChangeVolumeClassic
-    GamingRegSet
-
-    InstallChocolatey
-    InstallChocoPkgTools
-    InstallChocoPkgMisc
-
-    UpdateNvidiaDrivers
-    UpdateChoco
 }

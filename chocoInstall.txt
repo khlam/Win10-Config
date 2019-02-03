@@ -1,0 +1,17 @@
+vlc
+firefox
+keepassxc
+git.install
+megasync
+sumatrapdf.install
+winscp
+putty.install
+visualstudiocode
+hwmonitor
+7zip.install
+discord
+cpu-z
+deluge
+steam
+autohotkey.install
+keepass

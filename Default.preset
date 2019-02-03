@@ -190,7 +190,20 @@ UnpinStartMenuTiles
 UnpinTaskbarIcons
 
 ### Personal functions ###
-main
+DisableServices
+DisableNagle
+DisableTeleIps
+DisableEnhancedPointerPrecision
+DisableTransparency
+ChangeVolumeClassic
+GamingRegSet
+
+InstallChoco
+InstallChocoPrograms
+UpdateChoco
+
+UpdateNvidiaDrivers
+UpdateChoco
 
 ### Auxiliary Functions ###
 WaitForKey
